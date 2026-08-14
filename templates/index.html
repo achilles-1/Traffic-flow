@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Traffic Flow Optimization</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <!-- Header -->
+    <header class="header">
+
+        <h1>Traffic Flow Optimization System</h1>
+
+        <p>
+            Machine Learning Based Traffic Prediction
+            and Signal Optimization
+        </p>
+
+    </header>
+
+
+    <main class="container">
+
+        <!-- Input Form -->
+        <section class="card">
+
+            <h2>Enter Traffic and Weather Information</h2>
+
+            <form method="POST">
+
+                <div class="form-grid">
+
+                    <!-- Hour -->
+                    <div class="input-group">
+
+                        <label for="hour">
+                            Hour (0-23)
+                        </label>
+
+                        <input
+                            type="number"
+                            name="hour"
+                            id="hour"
+                            min="0"
+                            max="23"
+                            placeholder="Example: 17"
+                            required
+                        >
+
+                    </div>
+
+
+                    <!-- Day -->
+                    <div class="input-group">
+
+                        <label for="day_of_week">
+                            Day of Week
+                        </label>
+
+                        <select
+                            name="day_of_week"
+                            id="day_of_week"
+                            required
+                        >
+
+                            <option value="">
+                                Select day
+                            </option>
+
+                            <!-- Pandas dayofweek:
+                                 0 = Monday
+                                 1 = Tuesday
+                                 2 = Wednesday
+                                 3 = Thursday
+                                 4 = Friday
+                                 5 = Saturday
+                                 6 = Sunday
+                            -->
+
+                            <option value="0">Monday</option>
+                            <option value="1">Tuesday</option>
+                            <option value="2">Wednesday</option>
+                            <option value="3">Thursday</option>
+                            <option value="4">Friday</option>
+                            <option value="5">Saturday</option>
+                            <option value="6">Sunday</option>
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- Month -->
+                    <div class="input-group">
+
+                        <label for="month">
+                            Month
+                        </label>
+
+                        <select
+                            name="month"
+                            id="month"
+                            required
+                        >
+
+                            <option value="">
+                                Select month
+                            </option>
+
+                            <option value="1">January</option>
+                            <option value="2">February</option>
+                            <option value="3">March</option>
+                            <option value="4">April</option>
+                            <option value="5">May</option>
+                            <option value="6">June</option>
+                            <option value="7">July</option>
+                            <option value="8">August</option>
+                            <option value="9">September</option>
+                            <option value="10">October</option>
+                            <option value="11">November</option>
+                            <option value="12">December</option>
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- Temperature -->
+                    <div class="input-group">
+
+                        <label for="temperature">
+                            Temperature (Kelvin)
+                        </label>
+
+                        <input
+                            type="number"
+                            name="temperature"
+                            id="temperature"
+                            step="any"
+                            placeholder="Example: 288"
+                            required
+                        >
+
+                    </div>
+
+
+                    <!-- Rain -->
+                    <div class="input-group">
+
+                        <label for="rain">
+                            Rain (mm)
+                        </label>
+
+                        <input
+                            type="number"
+                            name="rain"
+                            id="rain"
+                            step="any"
+                            min="0"
+                            placeholder="Example: 0"
+                            required
+                        >
+
+                    </div>
+
+
+                    <!-- Snow -->
+                    <div class="input-group">
+
+                        <label for="snow">
+                            Snow (mm)
+                        </label>
+
+                        <input
+                            type="number"
+                            name="snow"
+                            id="snow"
+                            step="any"
+                            min="0"
+                            placeholder="Example: 0"
+                            required
+                        >
+
+                    </div>
+
+
+                    <!-- Clouds -->
+                    <div class="input-group">
+
+                        <label for="clouds">
+                            Cloud Coverage (%)
+                        </label>
+
+                        <input
+                            type="number"
+                            name="clouds"
+                            id="clouds"
+                            step="any"
+                            min="0"
+                            max="100"
+                            placeholder="Example: 40"
+                            required
+                        >
+
+                    </div>
+
+
+                    <!-- Holiday -->
+                    <div class="input-group">
+
+                        <label for="holiday">
+                            Holiday
+                        </label>
+
+                        <select
+                            name="holiday"
+                            id="holiday"
+                            required
+                        >
+
+                            <option value="0">No</option>
+                            <option value="1">Yes</option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+
+                <div class="button-container">
+
+                    <button type="submit">
+                        Predict Traffic
+                    </button>
+
+                </div>
+
+            </form>
+
+        </section>
+
+
+        <!-- Prediction Result -->
+        {% if prediction is not none %}
+
+        <section class="card results">
+
+            <h2>Traffic Prediction Result</h2>
+
+            <div class="prediction">
+
+                {{ "%.2f"|format(prediction) }}
+
+                <span>vehicles</span>
+
+            </div>
+
+
+            <div class="traffic-level">
+
+                Traffic Level:
+
+                <strong>{{ traffic_level }}</strong>
+
+            </div>
+
+
+            <!-- Signal Timing -->
+            <div class="timing-grid">
+
+                <div class="timing-box">
+
+                    <h3>
+                        Recommended Green Time
+                    </h3>
+
+                    <div class="timing-value">
+
+                        {{ green_time }}
+
+                        seconds
+
+                    </div>
+
+                </div>
+
+
+                <div class="timing-box">
+
+                    <h3>
+                        Recommended Red Time
+                    </h3>
+
+                    <div class="timing-value">
+
+                        {{ red_time }}
+
+                        seconds
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        {% endif %}
+
+
+        <!-- Model Performance -->
+        <section class="card">
+
+            <h2>Model Performance</h2>
+
+            <div class="metrics">
+
+                <div class="metric">
+
+                    <h3>R² Performance</h3>
+
+                    <p>
+                        {{ "%.2f"|format(r2_score * 100) }}%
+                    </p>
+
+                </div>
+
+
+                <div class="metric">
+
+                    <h3>MAE</h3>
+
+                    <p>
+                        {{ "%.2f"|format(mae) }}
+                    </p>
+
+                </div>
+
+
+                <div class="metric">
+
+                    <h3>RMSE</h3>
+
+                    <p>
+                        {{ "%.2f"|format(rmse) }}
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- Historical Traffic Analysis -->
+        <section class="card">
+
+            <h2>Historical Traffic Analysis</h2>
+
+            <div class="chart-grid">
+
+                <div class="chart">
+
+                    <h3>Traffic by Hour</h3>
+
+                    <img
+                        src="{{ url_for(
+                            'static',
+                            filename='images/traffic_by_hour.png'
+                        ) }}"
+                        alt="Traffic by Hour"
+                    >
+
+                </div>
+
+
+                <div class="chart">
+
+                    <h3>Traffic by Day</h3>
+
+                    <img
+                        src="{{ url_for(
+                            'static',
+                            filename='images/traffic_by_day.png'
+                        ) }}"
+                        alt="Traffic by Day"
+                    >
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- Footer -->
+    <footer class="footer">
+
+        <p>
+            Traffic Flow Optimization System
+        </p>
+
+    </footer>
+
+</body>
+
+</html>
