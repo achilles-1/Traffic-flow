@@ -1,36 +1,35 @@
-def optimize_traffic(traffic):
+def optimize_traffic(traffic_level):
 
-    if traffic < 3000:
-        level = "Low"
+    if traffic_level == "Low":
         green_time = 30
         red_time = 60
 
-    elif traffic < 6000:
-        level = "Medium"
+    elif traffic_level == "Medium":
         green_time = 60
         red_time = 45
 
-    else:
-        level = "High"
+    elif traffic_level == "High":
         green_time = 90
         red_time = 30
 
-    return level, green_time, red_time
+    else:
+        raise ValueError("Invalid traffic level")
+
+    return green_time, red_time
 
 
 if __name__ == "__main__":
 
-    traffic = float(
-        input("Enter predicted traffic volume: ")
+    traffic_level = input(
+        "Enter traffic level (Low/Medium/High): "
     )
 
-    level, green_time, red_time = optimize_traffic(
-        traffic
+    green_time, red_time = optimize_traffic(
+        traffic_level
     )
 
     print()
     print("===== Traffic Flow Optimization =====")
-    print("Predicted Traffic:", round(traffic, 2))
-    print("Traffic Level:", level)
+    print("Traffic Level:", traffic_level)
     print("Recommended Green Time:", green_time, "seconds")
     print("Recommended Red Time:", red_time, "seconds")

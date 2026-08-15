@@ -9,7 +9,7 @@ app = Flask(__name__)
 
 
 # ==============================
-# Load trained model
+# Load Regression Model
 # ==============================
 
 MODEL_PATH = "model.pkl"
@@ -21,7 +21,19 @@ features = model_data["features"]
 
 
 # ==============================
-# Model performance
+# Load Classification Model
+# ==============================
+
+CLASSIFIER_PATH = "traffic_classifier.pkl"
+
+classifier_data = joblib.load(CLASSIFIER_PATH)
+
+classifier = classifier_data["model"]
+classifier_features = classifier_data["features"]
+
+
+# ==============================
+# Model Performance
 # ==============================
 
 MODEL_ACCURACY = 95.13
@@ -31,7 +43,7 @@ RMSE = 439.01
 
 
 # ==============================
-# Home page
+# Home Page
 # ==============================
 
 @app.route("/", methods=["GET", "POST"])
@@ -44,9 +56,13 @@ def home():
 
     if request.method == "POST":
 
-        # Get input values from HTML form
+        # ==============================
+        # Get Input Values
+        # ==============================
 
-        hour = int(request.form["hour"])
+        hour = int(
+            request.form["hour"]
+        )
 
         day_of_week = int(
             request.form["day_of_week"]
@@ -78,7 +94,7 @@ def home():
 
 
         # ==============================
-        # Calculate derived features
+        # Calculate Derived Features
         # ==============================
 
         is_weekend = int(
@@ -91,7 +107,7 @@ def home():
 
 
         # ==============================
-        # Create input for model
+        # Create Input Data
         # ==============================
 
         input_data = pd.DataFrame(
@@ -112,7 +128,7 @@ def home():
 
 
         # ==============================
-        # Predict traffic volume
+        # Predict Traffic Volume
         # ==============================
 
         prediction = model.predict(
@@ -121,16 +137,25 @@ def home():
 
 
         # ==============================
-        # Optimize traffic
+        # Classify Traffic Level
         # ==============================
 
-        traffic_level, green_time, red_time = (
-            optimize_traffic(prediction)
+        traffic_level = classifier.predict(
+            input_data
+        )[0]
+
+
+        # ==============================
+        # Optimize Traffic
+        # ==============================
+
+        green_time, red_time = optimize_traffic(
+            traffic_level
         )
 
 
     # ==============================
-    # Send data to HTML
+    # Send Data to HTML
     # ==============================
 
     return render_template(
@@ -147,7 +172,7 @@ def home():
 
 
 # ==============================
-# Run Flask application
+# Run Flask Application
 # ==============================
 
 if __name__ == "__main__":
